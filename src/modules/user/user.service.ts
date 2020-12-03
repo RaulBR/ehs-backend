@@ -99,7 +99,7 @@ export class UserService {
 
         try {
             const regiUser = await this.userRepository.save(dbUser);
-            let employeeDbo = this.employeeRepository.create(employee);
+            const employeeDbo = this.employeeRepository.create(employee);
             employee.user = dbUser;
             await this.employeeRepository.save(employeeDbo);
             return regiUser.toResponceObject();
