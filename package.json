@@ -29,6 +29,7 @@
     "@nestjs/typeorm": "^7.1.0",
     "@nestjs/websockets": "^7.4.2",
     "@types/bcrypt": "^3.0.0",
+    "ts-node": "^8.6.2", // moved form devDEpendency
     "bcrypt": "^5.0.0",
     "cache-manager": "^3.4.0",
     "cache-manager-redis-store": "^2.0.0",
@@ -68,7 +69,6 @@
     "supertest": "^4.0.2",
     "ts-jest": "26.1.0",
     "ts-loader": "^6.2.1",
-    "ts-node": "^8.6.2",
     "tsconfig-paths": "^3.9.0",
     "typescript": "^3.7.4"
   },
