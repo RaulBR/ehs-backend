@@ -22,9 +22,9 @@ import { CategoryModule } from './modules/audit-category/category.module';import
 
     CacheModule.register({
       store: redisStore,
-      host: 'ec2-54-73-148-106.eu-west-1.compute.amazonaws.com',
-      port: 13239,
-      password: 'p96ec900006c4779c08becd70d4af627c7e27a07bd667913fda8ac37ee58d74f8'
+      host: env.CASH_HOST,
+      port: env.CASH_PORT,
+      password: env.CASH_PASSWORD
     })
   ],
 
