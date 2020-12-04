@@ -2,7 +2,7 @@ import { Controller,  Req, Delete, Body, Query, Post} from '@nestjs/common';
 import { AspectService } from '../aspect.service';
 import { AspectCrudRequest } from '../aspect.model';
 import { Auth } from 'src/decorators/request.decorater';
-import { ROLE } from 'src/models/entities/role.enum';
+import { ROLE } from 'src/models/enums/role.enum';
 import { Aspect } from '../aspect.entity';
 
 

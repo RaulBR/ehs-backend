@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Connection } from 'typeorm';
+import { Repository, Connection, DeleteResult } from 'typeorm';
 import { User } from '../user/user.entity';
 import { UtilsService } from 'src/services/utils.service';
 import { CategoryType, Category } from './category.entity';
@@ -16,7 +16,10 @@ export class CategoryService {
         private readonly utilityService: UtilsService) { }
 
 
-    async getGetCategoryTypes(data: PaginationObject) {
+    async getGetCategoryTypes(data: PaginationObject): Promise<CategoryType[]> {
+        if(data) {
+            data = data;
+        }
         try {
             const categoryes = await this.categoryTypeRepository.find({
                 relations: ['categories']
@@ -29,7 +32,7 @@ export class CategoryService {
 
     }
 
-    async setCategoryType(categoryType: CategoryType, user: User) {
+    async setCategoryType(categoryType: CategoryType, user: User): Promise<CategoryType> {
         // only users with roll admin shoud be able to add
 
         // check if Area is unique
@@ -75,7 +78,7 @@ export class CategoryService {
         }
     }
 
-    async deleteCategoryType(categoryType: CategoryType, user: User) {
+    async deleteCategoryType(categoryType: CategoryType, user: User): Promise<CategoryType[]> {
         if (!categoryType || !user) {
             throw new HttpException('Missing categoryType incorect request', HttpStatus.BAD_REQUEST);
         }
@@ -85,26 +88,26 @@ export class CategoryService {
                 relations: ['categories']
             });
             if (!dataFromDb) {
-                return new HttpException('no data', 200);
+                throw new HttpException('no data', 200);
             }
              this.connection.transaction(async manager => {
                 await manager.remove<Category>(dataFromDb.categories);
                 await manager.remove<CategoryType>(dataFromDb);
             });
         } catch (e) {
-            return new HttpException('delete error', 200);
+            throw new HttpException('delete error', 200);
         }
         return this.getGetCategoryTypes(null); 
     }
 
-    async deleteCategory(category: Category, user: User) {
+    async deleteCategory(category: Category, user: User): Promise<DeleteResult> {
         if (!category || !user) {
             throw new HttpException('Missing category incorect request', HttpStatus.BAD_REQUEST);
         }
         try {
             return await this.categoryRepository.delete({ id: category.id });
         } catch (e) {
-            return new HttpException('delete error', 200);
+            throw new HttpException('delete error', 200);
         }
     }
 }

@@ -1,9 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
 
 import { Reflector } from '@nestjs/core';
-import { ROLE } from 'src/models/entities/role.enum';
+import { ROLE } from 'src/models/enums/role.enum';
 
 
 @Injectable()

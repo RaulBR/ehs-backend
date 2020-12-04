@@ -10,31 +10,31 @@
 //     CASH_PORT:  13239,
 //     CASH_PASSWORD : 'p96ec900006c4779c08becd70d4af627c7e27a07bd667913fda8ac37ee58d74f8'
 // }
-export const config = () => ({
+// export const config = () => ({
    
-        name: 'default',
-        type: 'postgres',
-        host: 'localhost',
-        port: 5432,
-        username: 'postgres',
-        password: 'Serpentina',
-        database: 'ehsfocus',
-        synchronize: false,
-        dropSchema: false,
-        logging: false,
-        entities:  ["dist/**/*.entity{.ts,.js}"],
+//         name: 'default',
+//         type: 'postgres',
+//         host: 'localhost',
+//         port: 5432,
+//         username: 'postgres',
+//         password: 'Serpentina',
+//         database: 'ehsfocus',
+//         synchronize: false,
+//         dropSchema: false,
+//         logging: false,
+//         entities:  ["dist/**/*.entity{.ts,.js}"],
    
-});
-const env = {
-    SECRET : 'Y&:ZX6+1fUq4h<>Tv9aAef^ca*{#fsePz`Smj#uYRLjtv$)3$gYu:?+_Yt<3PuF',
-    DB_HOST : 'localhost',
-    DB_PASSWORD : 'Serpentina',
-    DB_DATABASE:'ehsfocus',
-    DB_NAME:  'default',
-    DB_USER: 'postgres',
-    DB_PORT :5432,
-    CASH_HOST: 'localhost',
-    CASH_PORT:  6379,
-    CASH_PASSWORD : null
-}
+// });
+// const env = {
+//     SECRET : 'Y&:ZX6+1fUq4h<>Tv9aAef^ca*{#fsePz`Smj#uYRLjtv$)3$gYu:?+_Yt<3PuF',
+//     DB_HOST : 'localhost',
+//     DB_PASSWORD : 'Serpentina',
+//     DB_DATABASE:'ehsfocus',
+//     DB_NAME:  'default',
+//     DB_USER: 'postgres',
+//     DB_PORT :5432,
+//     CASH_HOST: 'localhost',
+//     CASH_PORT:  6379,
+//     CASH_PASSWORD : null
+// }
 

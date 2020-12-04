@@ -28,9 +28,8 @@ export class AuditGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
   server: Server;
   private logger: Logger = new Logger('AuditGateway');
   @UseGuards(SocketAuth)
- 
-  async handleConnection(client: any, ...args: any[]) {
-  
+  async handleConnection(client: Socket, ...args: any[]) {
+  console.log(client,args);
   }
 
   handleDisconnect(client: Socket) {

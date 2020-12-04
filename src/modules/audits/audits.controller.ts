@@ -3,7 +3,7 @@ import { AuditsService } from './audits.service';;
 import { AuditDto } from './audit.dto';
 import { AuditHead } from './audit.entity';
 import { Auth } from 'src/decorators/request.decorater';
-import { ROLE } from 'src/models/entities/role.enum';
+import { ROLE } from 'src/models/enums/role.enum';
 import { AuditGateway } from './audit.gateway';
 
 @Controller()

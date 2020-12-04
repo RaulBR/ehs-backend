@@ -9,6 +9,7 @@ import { UtilsService } from 'src/services/utils.service';
 import { AreaService } from '../area/area.service';
 import { Employee } from '../employee/employee.entity';
 import { AuditAction } from './audit_aspect/action.entity';
+import { Area, AreaRole } from '../area/area.entity';
 
 @Injectable()
 export class AuditsService {
@@ -82,15 +83,17 @@ export class AuditsService {
     async getNumberOfAuditsTobeDistribuied(user: User) {
         // all the audits that are of my area and have status submited  
         const user2 =  await this.userRepository.findOne({ where: { email: user.email } });  
-        const employeeAreas = await this.areaService.getEmployeeAreas(user2);
-        if (!employeeAreas.length){
+        const employee = await this.areaService.getEmployee(user2)
+   
+        if (!employee){
             return 0;
         }
-
+        const employeeId = employee.id;
         const data =  await this.connection.getRepository('Aspect')
         .createQueryBuilder("aspect")
         .innerJoinAndSelect("aspect.audit", "audit")
-        .where("audit.area IN (:...employeeAreas)", {employeeAreas})
+        .innerJoin( AreaRole ,"arearole", `arearole.role = aspect.categoryType  and "arearole"."responsableId" =:employeeId`, {employeeId})
+        .innerJoinAndSelect(Area ,"area", 'area.area = audit.area and "arearole"."areaId" = "area"."id"')
         .andWhere("aspect.status='S'")
         .andWhere("aspect.type='N'")
         .andWhere("audit.auditStatus='B'")
@@ -103,10 +106,11 @@ export class AuditsService {
 
     async getAuditsTobeDistribuied(user: User) {
         // all the audits that are of my area and have status submited    
-        const employeeAreas = await this.areaService.getEmployeeAreas(user);
-        if (!employeeAreas.length){
+        const employee = await this.areaService.getEmployee(user)
+        if (!employee){
             return 0;
         }
+        const employeeId = employee.id;
         const data =
          await this.connection.getRepository('Aspect')
         .createQueryBuilder("aspect")
@@ -114,8 +118,9 @@ export class AuditsService {
         .leftJoinAndSelect("aspect.photos", "photos" )
         .leftJoinAndSelect("auditAction.responsable", "responsable" )
         .innerJoinAndSelect("aspect.audit", "audit")
+        .innerJoin( AreaRole ,"arearole", `arearole.role = aspect.categoryType  and "arearole"."responsableId" =:employeeId`, {employeeId})
+        .innerJoinAndSelect(Area ,"area", 'area.area = audit.area and "arearole"."areaId" = "area"."id"')
         .innerJoinAndSelect("audit.employee", "employee")
-        .where("audit.area IN (:...employeeAreas)", {employeeAreas})
         .andWhere("aspect.status='S'")
         .andWhere("aspect.type='N'")
         .andWhere("audit.auditStatus='B'")
@@ -123,7 +128,8 @@ export class AuditsService {
         .getMany();
 
         return data;
-             
+      //  INNER JOIN "area_role" "areaRole" ON  "areaRole"."role" = "aspect"."categoryType" 
+      //  INNER JOIN "area" "area" ON  "area"."area" = "audit"."area"     
     }
    
 

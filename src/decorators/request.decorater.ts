@@ -1,12 +1,12 @@
 
 
 import { applyDecorators, UseGuards, UsePipes, ValidationPipe, BadRequestException } from '@nestjs/common';
-import { ROLE } from 'src/models/entities/role.enum';
+import { ROLE } from 'src/models/enums/role.enum';
 import { Role } from './role.decorator';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from 'src/auth/role-guard';
 
-export function Auth(role?: ROLE) {
+export function Auth(role?: ROLE): any {
     if (!role) {
         return applyDecorators(
             UseGuards(AuthGuard('jwt')),
@@ -20,7 +20,7 @@ export function Auth(role?: ROLE) {
 }
 
 
-export function ValidateMapper(id?: string) {
+export function ValidateMapper(id?: string) : any {
     return applyDecorators(
         UsePipes(new ValidationPipe({
             exceptionFactory: (errors) => {

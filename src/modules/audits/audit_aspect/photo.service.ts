@@ -15,7 +15,7 @@ export class PhotoService {
         if (!data || !user) {
             return new HttpException('No data', HttpStatus.BAD_REQUEST);
         }
-        let photoRrepo = this.aspectphotoRepository.create(data);
+        const photoRrepo = this.aspectphotoRepository.create(data);
         const userRepo = this.userHeadRepository.create(user);
         photoRrepo.user = userRepo;
         try {

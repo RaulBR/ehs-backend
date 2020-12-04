@@ -65,7 +65,7 @@ export class AspectPhoto extends BaseObject {
         nullable: true,
         select: false
     })
-    photo: String;
+    photo: string;
 
     @Column()
     name: string;
@@ -80,7 +80,7 @@ export class AspectPhoto extends BaseObject {
     aspectId?: string;
 
     @Column({ select: false })
-    userId: String;
+    userId: string;
 
     @ManyToOne(type => Aspect, aspect => aspect.photos ,{onDelete: 'CASCADE'})
     @JoinColumn({ name: 'aspectId' })

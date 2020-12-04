@@ -51,7 +51,7 @@ export class User extends BaseObject {
         this.password = await bcrypt.hash(this.password, salt);
 
     }
-    async compare?(textPass: String) {
+    async compare?(textPass: string) {
         return await bcrypt
             .compare(textPass, this.password);
     }

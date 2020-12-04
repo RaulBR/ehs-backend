@@ -1,6 +1,6 @@
 import { Controller, Req,  Body, Query, Post, Get } from '@nestjs/common';
 import { AspectPhoto, Aspect } from '../aspect.entity';
-import { ROLE } from 'src/models/entities/role.enum';
+import { ROLE } from 'src/models/enums/role.enum';
 import { Auth } from 'src/decorators/request.decorater';
 import { PhotoService } from '../photo.service';
 

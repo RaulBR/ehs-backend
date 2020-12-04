@@ -1,6 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository } from 'typeorm';
 import { User } from '../user/user.entity';
 import { Employee } from './employee.entity';
 import { UtilsService } from 'src/services/utils.service';
@@ -41,7 +41,7 @@ export class EmployeeService {
        
     }
 
-    async deleteEmployee( employee: Employee) {
+    async deleteEmployee( employee: Employee): Promise<DeleteResult> {
         if(!employee) {
             throw new HttpException('no employee', HttpStatus.OK);
         }
@@ -64,8 +64,8 @@ export class EmployeeService {
 
     }
 
-    async getEmployees(rows: PaginationObject, user: User): Promise<Employee[]> {
-        const search = rows.searchQuerry || '';
+    async getEmployees(rows: PaginationObject): Promise<Employee[]> {
+     //   const search = rows.searchQuerry || '';
         rows = this.utilityService.getRows(rows);
         try {
             const result = await this.employeeRepository.find({

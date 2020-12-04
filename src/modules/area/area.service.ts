@@ -1,13 +1,12 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-
 import { Area, AreaStep, AreaRole } from './area.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Connection, Like } from 'typeorm';
+import { Repository, Connection, Like, DeleteResult } from 'typeorm';
 import { UtilsService } from 'src/services/utils.service';
 import { PaginationObject } from 'src/models/request.model';
 import { User } from '../user/user.entity';
 import { Employee } from '../employee/employee.entity';
-import { response } from 'express';
+import { ResponceStatus } from 'src/models/responceStatus.model';
 
 
 @Injectable()
@@ -66,7 +65,7 @@ export class AreaService {
         }
     }
 
-    async getAreas(rows: PaginationObject, user?: User): Promise<Area[]> {
+    async getAreas(rows: PaginationObject): Promise<Area[]> {
         const search = rows?.searchQuerry || '';
         rows = this.utilsService.getRows(rows);
         try {
@@ -86,12 +85,12 @@ export class AreaService {
         }
 
     }
-   
+
     async getAreaResponsable(area: string): Promise<Area> {
 
         try {
             const result = await this.areaRepository.findOne({
-                where: { area:  area },
+                where: { area: area },
                 relations: ['roles', 'roles.responsable']
             });
             return result.toResponceObject();
@@ -105,14 +104,14 @@ export class AreaService {
 
     }
 
-    async deleteArea(area: Area) {
+    async deleteArea(area: Area): Promise<Area[]> {
         try {
             const dataFromDb = await this.areaRepository.findOne({
                 where: { id: area.id },
                 relations: ['roles', 'steps']
             });
             if (!dataFromDb) {
-                return new HttpException('no data', 200);
+                throw new HttpException('no data', 200);
             }
             return this.connection.transaction(async manager => {
                 if (dataFromDb.steps && dataFromDb.steps.length) {
@@ -125,47 +124,47 @@ export class AreaService {
                 return this.getAreas(null);
             });
         } catch (e) {
-            return new HttpException('delete error', 200);
+            throw new HttpException('delete error', 200);
         }
     }
 
-    async addAreaStep(step: AreaStep, user: User) {
+    async addAreaStep(step: AreaStep, user: User): Promise<ResponceStatus> {
         if (!step || !user) {
             return;
         }
         step = this.utilsService.removeNullProperty('id', step);
         const stepDao = this.areaStepRepository.create(step);
         try {
-            return await this.areaStepRepository.save(stepDao);
+            throw await this.areaStepRepository.save(stepDao);
         } catch (e) {
             return { status: 'save error' };
         }
 
     }
 
-    async deletereaStep(step: AreaStep, user: User) {
+    async deletereaStep(step: AreaStep, user: User): Promise<DeleteResult> {
         if (!step || !user) {
             return;
         }
         try {
             return await this.areaStepRepository.delete({ id: step.id });
         } catch (e) {
-            return { status: 'save error' };
+            throw { status: 'save error' };
         }
     }
 
-    async deleteAllStepsOfarea(area: Area, user: User) {
+    async deleteAllStepsOfarea(area: Area, user: User) : Promise<DeleteResult> {
         if (!area || !user) {
             return;
         }
         try {
             return await this.areaStepRepository.delete({ areaId: area.id });
         } catch (e) {
-            return { status: 'save error' };
+            throw { status: 'save error' };
         }
     }
 
-    async deleteAreaRole(areaRole: AreaRole) {
+    async deleteAreaRole(areaRole: AreaRole) : Promise<Area> {
         if (!areaRole) {
             return;
         }
@@ -182,21 +181,32 @@ export class AreaService {
     }
 
 
-    async getEmployeeAreas(user: User): Promise<String[]> {
-        try{
-            const employee = await this.employeeRepository.findOne({ where: { user: user }});
-            const data =  await this.areaRolesRepository.find(
+    async getEmployeeAreas(user: User): Promise<string[]> {
+        try {
+            const employee = await this.employeeRepository.findOne({ where: { user: user } });
+            const data = await this.areaRolesRepository.find(
                 {
-                    relations:['area'],
-                    where: {'responsable': employee}
+                    relations: ['area'],
+                    where: { 'responsable': employee }
                 }
             );
             return data.map(e => e.area.area);
 
-        }catch(e) {
+        } catch (e) {
             return [];
         }
-        
+
+    }
+    async getEmployee(user: User): Promise<Employee> {
+        try {
+            return await this.employeeRepository.findOne({ where: { user: user } });
+
+
+
+        } catch (e) {
+            return;
+        }
+
     }
 
 }

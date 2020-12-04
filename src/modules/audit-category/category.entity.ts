@@ -6,7 +6,7 @@ import { User } from "src/modules/user/user.entity";
 @Entity()
 export class CategoryType extends BaseObject {
 
-    @Column() type: String;
+    @Column() type: string;
     @ManyToOne(type => User)
     createdUser?: User;
     @OneToMany(type => Category, category => category.categoryType, { cascade: true })
@@ -21,11 +21,11 @@ export class CategoryType extends BaseObject {
 // category for evey oudit type
 @Entity()
 export class Category extends BaseObject {
-    @Column() category: String;
+    @Column() category: string;
     // @Column() description: String;
     @ManyToOne(type => User)
     createdUser?: User;
-    categoryId?: String;
+    categoryId?: string;
     @ManyToOne(type => CategoryType, categoryType => categoryType.categories)
     @JoinColumn({ name: 'categoryId' })
     categoryType: CategoryType;

@@ -2,7 +2,7 @@ import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from '../../auth/auth.service';
 import { User } from './user.entity';
 import { UserService } from './user.service';
-import { Auth, ValidateMapper } from 'src/decorators/request.decorater';
+import {  ValidateMapper } from 'src/decorators/request.decorater';
 import { AuthGuard } from '@nestjs/passport';
 
 
@@ -13,7 +13,7 @@ export class UserController {
 
     @Post('login')
     @ValidateMapper('User')
-    async login(@Body() data: User) {
+    async login(@Body() data: User): Promise<User> {
         const user = await this.loginService.login(data)
         if (!user) {
             return;
@@ -26,7 +26,7 @@ export class UserController {
 
     @Post('register')
     @ValidateMapper('User')
-    async register(@Body() data: User) {
+    async register(@Body() data: User): Promise<User> {
         const user = await this.loginService.register(data);
         if (!user) {
             return;
@@ -38,7 +38,7 @@ export class UserController {
    
     @Post('me')
     @UseGuards(AuthGuard('jwt'))
-    async isTokenValid(@Req() request) {
+    async isTokenValid(@Req() request): Promise<User> {
         const user = await this.loginService.whoAmI(request.user);
         if (!user) {
             return;

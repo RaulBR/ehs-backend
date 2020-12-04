@@ -6,8 +6,8 @@ import { Employee } from "../employee/employee.entity";
 
 @Entity()
 export class Area extends BaseObject {
-    @Column({ unique: true }) area: String;
-    @Column({ nullable: true }) areaInfo: String;
+    @Column({ unique: true }) area: string;
+    @Column({ nullable: true }) areaInfo: string;
     @ManyToOne(type => User)
     createdUser?: User;
     @OneToMany(type => AreaStep, steps => steps.area, { cascade: true })
@@ -23,9 +23,9 @@ export class Area extends BaseObject {
 
 @Entity()
 export class AreaStep extends BaseObject {
-    @Column() step: String;
-    @Column() stepinfo: String;
-    areaId?: String;
+    @Column() step: string;
+    @Column() stepinfo: string;
+    areaId?: string;
     @ManyToOne(type => Area, area => area.steps)
     @JoinColumn({ name: 'areaId' })
     area?: Area;
@@ -40,12 +40,12 @@ export class AreaStep extends BaseObject {
 
 @Entity()
 export class AreaRole extends BaseObject {
-    @Column() role: String;
-    areaId?: String;
+    @Column() role: string;
+    areaId?: string;
     @ManyToOne(type => Area)
     @JoinColumn({ name: 'areaId' })
     area: Area;
-    responsableId?: String;
+    responsableId?: string;
     @ManyToOne(type => Employee)
     @JoinColumn({ name: 'responsableId' })
     responsable: Employee;

@@ -4,6 +4,7 @@ import { Repository, IsNull } from "typeorm";
 import { HttpException, HttpStatus } from "@nestjs/common";
 import { UtilsService } from "src/services/utils.service";
 import { Employee } from "../employee/employee.entity";
+import { Payload } from "src/models/payload.model";
 
 export class UserService {
     constructor(@InjectRepository(User) private readonly userRepository: Repository<User>,
@@ -11,7 +12,7 @@ export class UserService {
         @InjectRepository(Employee) private readonly employeeRepository: Repository<Employee>,
         private readonly utilService: UtilsService) { }
 
-    async findByPayload(payload: any): Promise<User> {
+    async findByPayload(payload: Payload): Promise<User> {
         try {
             return await this.getUserById(payload.id);
         } catch (e) {

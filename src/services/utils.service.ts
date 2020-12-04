@@ -3,7 +3,7 @@ import { PaginationObject } from "src/models/request.model";
 
 @Injectable()
 export class UtilsService  {
-    removeNullProperty(propertyList: string, object: Object): any {
+    removeNullProperty(propertyList: string, object: any): any {
         if (!object || !propertyList) {
             return object;
         }

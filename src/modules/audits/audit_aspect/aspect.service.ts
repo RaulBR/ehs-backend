@@ -48,7 +48,7 @@ export class AspectService {
 
         } else {
             auditHead = this.utilsService.removeNullProperty('id', auditHead);
-            let auditHeadDto = this.auditHeadRepository.create(auditHead);
+            const auditHeadDto = this.auditHeadRepository.create(auditHead);
             const employee = await this.employeeRepository.findOne({ user: userData })
             auditHeadDto.auditStatus = auditHeadDto.auditStatus || 'S';
             auditHeadDto.employee = employee;
@@ -149,7 +149,7 @@ export class AspectService {
     // need to add a way to write modive
     // perhaps a column or tabel for comments
     async rejectAspect(data: Aspect, user: any): Promise<Aspect> {
-        let isAllawed = await this.IsUserResposible(user, data);
+        const isAllawed = await this.IsUserResposible(user, data);
         if (!isAllawed) {
             throw new HttpException('reject faild', HttpStatus.OK);
         }
@@ -197,7 +197,7 @@ export class AspectService {
             return;
         }
         try {
-            let area = await this.auditHeadRepository.findOne({ id: aspect.auditId });
+            const area = await this.auditHeadRepository.findOne({ id: aspect.auditId });
             return area.area;
         }
         catch (e) {
@@ -206,7 +206,7 @@ export class AspectService {
     }
   
     private async IsUserResposible(user, data: Aspect): Promise<boolean> {
-        let area = await this.getAspectArea(data);
+        const area = await this.getAspectArea(data);
         const areaResposible = await this.areaService.getEmployeeAreas(user);
         if (!area) return false;
         if (!areaResposible.length) return false;
