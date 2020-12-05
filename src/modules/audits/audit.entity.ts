@@ -14,7 +14,7 @@ export class AuditHead extends BaseObject {
     @Column({ default: "S" }) auditStatus: string;
 
     @OneToMany(type => Aspect, aspect => aspect.audit)
-    aspects: Aspect[];
+    aspects?: Aspect[];
     @Column() userId?: string;
     @ManyToOne(type => User, { primary: true })
     @JoinColumn({ name: 'userId', referencedColumnName: 'id' })

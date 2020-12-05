@@ -12,10 +12,9 @@ export class AuditsController {
               private readonly auditGateway: AuditGateway) { };
   @Get('audits')
   @Auth(ROLE.USER)
-  getaudits(@Req() request, @Headers() headers): AuditDto[] | any {
-    return this.auditService.getAudits(request.user)
-      .then(audits => audits)
-      .catch(e => { status: 'error' })
+  async getaudits(@Req() request): Promise<AuditDto[]> {
+    return await this.auditService.getAudits(request.user)
+    
 
   }
 

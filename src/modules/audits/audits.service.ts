@@ -10,6 +10,7 @@ import { AreaService } from '../area/area.service';
 import { Employee } from '../employee/employee.entity';
 import { AuditAction } from './audit_aspect/action.entity';
 import { Area, AreaRole } from '../area/area.entity';
+import { AuditDto } from './audit.dto';
 
 @Injectable()
 export class AuditsService {
@@ -62,7 +63,6 @@ export class AuditsService {
         }
 
         //valdiations 
-
         const areaRoles = await this.areaService.getAreaResponsable(auditHead.area);
         const responseList = [];
         if (areaRoles.roles.length) {
@@ -172,7 +172,7 @@ export class AuditsService {
     }
 
  
-    async getAudits(user: User) {
+    async getAudits(user: User): Promise<AuditDto[]> {
         try {
             const audits = await this.auditHeadRepository.find({
                 relations: ['aspects', 'aspects.auditAction',  'aspects.auditAction.responsable','aspects.photos'],
@@ -191,16 +191,14 @@ export class AuditsService {
                         auditStatus: data.auditStatus,
                         createdDate: data.createdDate,
                     },
-                    // aspects: data.aspects,
                     positiveAspects: this.filterAspects(data?.aspects, AspectType.Positive),
                     negativeAspects: this.filterAspects(data?.aspects, AspectType.Negative)
 
                 }
             });
         } catch (e) {
-            return new HttpException('error acured', HttpStatus.BAD_REQUEST);
+            throw new HttpException('error acured', HttpStatus.BAD_REQUEST);
         }
-
     }
 
     filterAspects(list: Aspect[], aspectType: AspectType): Aspect[] {
@@ -250,7 +248,6 @@ export class AuditsService {
           await this.auditHeadRepository.delete({ id: auditHeadDto.id });
           return { status: 'succes' };
         } catch(e) {
-            console.log(e);
             return { status: 'error' };
         }
     }

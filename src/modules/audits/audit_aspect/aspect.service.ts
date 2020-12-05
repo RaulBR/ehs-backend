@@ -187,7 +187,6 @@ export class AspectService {
             return aspect
 
         } catch (e) {
-            console.log(e);
             throw new HttpException('Cannot reject', HttpStatus.BAD_REQUEST);
         }
     }

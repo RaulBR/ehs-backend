@@ -31,7 +31,7 @@ export class SocketAuth implements CanActivate {
 
            return this.authService.validateUser(userFormToken['payload'] || null).then((data) => {
                // here
-               console.log(data.email, request.id);
+            //   console.log(data.email, request.id);
             this.cashingService.setValue(data.email, request.id)
                 request['user'] = data;
                 return true;

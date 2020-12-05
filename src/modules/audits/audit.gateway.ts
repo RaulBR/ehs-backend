@@ -29,7 +29,7 @@ export class AuditGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
   private logger: Logger = new Logger('AuditGateway');
   @UseGuards(SocketAuth)
   async handleConnection(client: Socket, ...args: any[]) {
-  console.log(client,args);
+  //console.log(client,args);
   }
 
   handleDisconnect(client: Socket) {
@@ -87,11 +87,11 @@ export class AuditGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
   }
   async emitMyReponsabilittyAspectsForUser(email: string) {
     const socket =  await this.cashingService.getValue(email);
-     console.log(' socket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socket', socket);
+     //console.log(' socket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socket', socket);
      
     if(socket) {
      const number = await this.auditService.getMyReponsabilittyAspectsNumber({email: email });
-     console.log(' socket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socke', number);
+     //console.log(' socket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socketsocket socket socket socke', number);
      this.server.to(socket).emit('myResponsibillity', number);
     }
    }
