@@ -13,17 +13,24 @@ export class AuditsController {
   @Get('audits')
   @Auth(ROLE.USER)
   async getaudits(@Req() request): Promise<AuditDto[]> {
-    return await this.auditService.getAudits(request.user)
+    return await this.auditService.getAudits(request.user);
     
 
   }
-
+  
+  @Get('myAudits')
+  @Auth(ROLE.USER)
+  async getMyaudits(@Req() request): Promise<AuditDto[]> {
+    return await this.auditService.getAllAudits(request.user);  
+  }
+  
   @Post('audit')
   @Auth(ROLE.USER)
   async setAuditHead(@Req() request, @Body() data: AuditHead) {
     return await this.auditService.setAuditHead(data, request.user);
 
   }
+ 
   @Post('submitAudit')
   @Auth(ROLE.USER)
   async submitAuditHead(@Req() request, @Body() data: AuditHead) {

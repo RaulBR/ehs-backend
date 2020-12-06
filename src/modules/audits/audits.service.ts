@@ -181,21 +181,24 @@ export class AuditsService {
                     auditStatus: 'S'
                 },
             });
-            return audits.map(data => {
-                return {
-                    auditHead: {
-                        id: data.id,
-                        area: data.area,
-                        step: data.step,
-                        sector: data.sector,
-                        auditStatus: data.auditStatus,
-                        createdDate: data.createdDate,
-                    },
-                    positiveAspects: this.filterAspects(data?.aspects, AspectType.Positive),
-                    negativeAspects: this.filterAspects(data?.aspects, AspectType.Negative)
-
-                }
+            return this.mapTOAuditDTo(audits);
+        } catch (e) {
+            throw new HttpException('error acured', HttpStatus.BAD_REQUEST);
+        }
+    }
+// simplyfy request
+    async getAllAudits(user: User): Promise<AuditDto[]> {
+        try {
+            const audits = await this.auditHeadRepository.find({
+                relations: ['aspects', 'aspects.auditAction',  'aspects.auditAction.responsable','aspects.photos'],
+                where: {
+                    'user': user
+                },
+                take: 50,
+                skip: 0,
+                // order: { createdDate: "ASC" }
             });
+            return this.mapTOAuditDTo(audits);
         } catch (e) {
             throw new HttpException('error acured', HttpStatus.BAD_REQUEST);
         }
@@ -252,5 +255,22 @@ export class AuditsService {
         }
     }
 
+        mapTOAuditDTo(audits) {
+            return audits.map(data => {
+                return {
+                    auditHead: {
+                        id: data.id,
+                        area: data.area,
+                        step: data.step,
+                        sector: data.sector,
+                        auditStatus: data.auditStatus,
+                        createdDate: data.createdDate,
+                    },
+                    positiveAspects: this.filterAspects(data?.aspects, AspectType.Positive),
+                    negativeAspects: this.filterAspects(data?.aspects, AspectType.Negative)
+
+                }
+            });
+        }
     
 }
