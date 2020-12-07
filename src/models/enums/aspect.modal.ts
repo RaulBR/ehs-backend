@@ -8,5 +8,9 @@ export enum AspectType {
 export enum AspectSate {
     Saved = 'S',
     Approved = 'A',
-    Resolved = 'R'
+    Resolved = 'R',
+    Duplicat = 'D',
+    InProgress = 'P',
+    Redistributed = 'X',
+    Rejected = 'Z'
 }    

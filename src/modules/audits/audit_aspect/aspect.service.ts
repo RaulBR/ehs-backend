@@ -2,7 +2,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { AspectCrudRequest } from './aspect.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuditHead, } from 'src/modules/audits/audit.entity';
-import { Connection, Repository } from 'typeorm';
+import { Connection, In, Not, Repository } from 'typeorm';
 import { UtilsService } from 'src/services/utils.service';
 import { AspectPhoto, Aspect } from 'src/modules/audits/audit_aspect/aspect.entity';
 import { User } from '../../user/user.entity';
@@ -132,6 +132,7 @@ export class AspectService {
         try {
             aspect = await this.statusUpdateAspect(data, user, AspectSate.Approved);
             aspect.auditAction = await this.actionRepository.save(action);
+            await this.statusUpdateAudit(aspect);
             if(aspect.auditAction.responsable) {
               await  this.sockerts.emitAuditisToDistributeForUser(user.email);
               await  this.sockerts.emitMyReponsabilittyAspectsForUser(aspect.auditAction.responsable.email);
@@ -153,7 +154,8 @@ export class AspectService {
         if (!isAllawed) {
             throw new HttpException('reject faild', HttpStatus.OK);
         }
-        return await this.statusUpdateAspect(data, user, AspectSate.Resolved);
+        const status = data.status != 'D' ? AspectSate.Resolved : AspectSate.Duplicat;
+        return await this.statusUpdateAspect(data, user, status);
     }
 
     // must add notifications for superviser
@@ -168,6 +170,7 @@ export class AspectService {
         try {
             aspect = await this.statusUpdateAspect(data, user, AspectSate.Resolved);
             await  this.sockerts.emitMyReponsabilittyAspectsForUser(user.email);
+        
         } catch (e) {
             throw new HttpException('accept faild', HttpStatus.OK);
         }
@@ -175,6 +178,24 @@ export class AspectService {
         return aspect;
     }
 
+    private async statusUpdateAudit(aspect: Aspect) {
+        const audits = await this.aspectRepository.count(
+            {where:{ id: aspect.id, status: Not(In([AspectSate.Duplicat,AspectSate.Rejected,AspectSate.Saved]))}}
+        );
+        let auditStauts = audits > 0 ? AspectSate.InProgress: AspectSate.Approved;
+        try {
+            await this.connection.getRepository('AuditHead')
+                .createQueryBuilder()
+                .update(AuditHead)
+                .set({ auditStatus: auditStauts })
+                .where("id = :val", { val: aspect.auditId })
+                .execute();
+            return aspect
+
+        } catch (e) {
+            throw new HttpException('Cannot reject', HttpStatus.BAD_REQUEST);
+        }
+     }
 
     private async statusUpdateAspect(aspect: Aspect, user: any, status): Promise<Aspect> {
         try {
