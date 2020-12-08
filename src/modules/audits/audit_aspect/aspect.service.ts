@@ -132,6 +132,7 @@ export class AspectService {
         try {
             aspect = await this.statusUpdateAspect(data, user, AspectSate.Approved);
             aspect.auditAction = await this.actionRepository.save(action);
+            aspect.status =  AspectSate.Approved;
             await this.statusUpdateAudit(aspect);
             if(aspect.auditAction.responsable) {
               await  this.sockerts.emitAuditisToDistributeForUser(user.email);
@@ -169,6 +170,8 @@ export class AspectService {
         let aspect: Aspect;
         try {
             aspect = await this.statusUpdateAspect(data, user, AspectSate.Resolved);
+            aspect.status = AspectSate.Resolved;
+            await this.statusUpdateAudit(aspect);
             await  this.sockerts.emitMyReponsabilittyAspectsForUser(user.email);
         
         } catch (e) {
@@ -180,9 +183,9 @@ export class AspectService {
 
     private async statusUpdateAudit(aspect: Aspect) {
         const audits = await this.aspectRepository.count(
-            {where:{ id: aspect.id, status: Not(In([AspectSate.Duplicat,AspectSate.Rejected,AspectSate.Saved]))}}
+            {where:{ id: aspect.id, status: In([AspectSate.Rejected,AspectSate.Saved])}}
         );
-        let auditStauts = audits > 0 ? AspectSate.InProgress: AspectSate.Approved;
+        const auditStauts = audits > 0 ? AspectSate.InProgress: aspect.status;
         try {
             await this.connection.getRepository('AuditHead')
                 .createQueryBuilder()

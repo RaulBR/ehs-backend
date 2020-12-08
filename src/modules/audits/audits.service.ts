@@ -151,7 +151,7 @@ export class AuditsService {
         .where('"auditAction"."responsableId" = :employeeId', {employeeId})
         .andWhere("aspect.status='A'")
         .andWhere("aspect.type='N'")
-        .andWhere("audit.auditStatus='B'")
+        // .andWhere("audit.auditStatus='P'")
         .orderBy("audit.area")
         .getMany();
         return aspects;
