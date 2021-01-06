@@ -187,6 +187,9 @@ export class AuditsService {
     async getMyReponsabilittyAspectsNumber(user: User): Promise<number> {
         const user2 = await this.userRepository.findOne({ where: { email: user.email } });
         const employee = await this.employeeRepository.findOne({ where: { user: user2 } });
+        if(!employee) {
+            return;
+        }
         const employeeId = employee.id;
         const aspectsCount = await this.connection.getRepository('Aspect')
             .createQueryBuilder("aspect")
