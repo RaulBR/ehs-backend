@@ -6,8 +6,8 @@ module.exports = {
     username: 'yhgbefvpubaszl',
     password: '615ec815f556a28aa918b6f5e1cc1514d018b5a371637fcf06e4baef4b602ea9',
     database: 'd710o49bke68if',
-    synchronize: false,
-    dropSchema: false,
+    synchronize: true,
+    dropSchema: true,
     logging: false,
     entities:  ["dist/**/*.entity{.ts,.js}"],
   };
