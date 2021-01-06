@@ -4,6 +4,8 @@ import { AspectCrudRequest } from '../aspect.model';
 import { Auth } from 'src/decorators/request.decorater';
 import { ROLE } from 'src/models/enums/role.enum';
 import { Aspect } from '../aspect.entity';
+import { DeleteResult } from 'typeorm';
+import { CustomRequest } from 'src/models/customRequest.model';
 
 
 @Controller('aspect')
@@ -13,33 +15,33 @@ export class AspectController {
     
     @Delete()
     @Auth(ROLE.USER)
-    deleteAspect(@Req() request, @Query() query) {
-      return this.aspectService.deleteAspect(query, request.user).then(data => data)
-        .catch(e => { status: 'error' });
+    deleteAspect(@Req() request: CustomRequest, @Query() query :Aspect): Promise<DeleteResult> {
+      return this.aspectService.deleteAspect(query, request.user).then(data => data);
     }
   
     @Post()
     @Auth(ROLE.USER)
-     setAspect(@Req() request, @Body() data: AspectCrudRequest) {
+    // thos Promise<AspectCrudRequest> is wiard and should not be used
+     setAspect(@Req() request: CustomRequest, @Body() data: AspectCrudRequest): Promise<AspectCrudRequest> {
       return  this.aspectService.setAspect(data, request.user);
   
     }
     @Post('reject')
     @Auth(ROLE.USER)
-     rejectAspect(@Req() request, @Body() data: Aspect) {
+     rejectAspect(@Req() request: CustomRequest, @Body() data: Aspect): Promise<Aspect> {
       return  this.aspectService.rejectAspect(data, request.user);
   
     }
     @Post('accept')
     @Auth(ROLE.USER)
-     acceptAspect(@Req() request, @Body() data: Aspect) {
+     acceptAspect(@Req() request: CustomRequest, @Body() data: Aspect): Promise<Aspect>{
       return  this.aspectService.acceptAspect(data, request.user);
   
     }
 
     @Post('resolve')
     @Auth(ROLE.USER)
-     resolveAspect(@Req() request, @Body() data: Aspect) {
+     resolveAspect(@Req() request: CustomRequest, @Body() data: Aspect): Promise<Aspect> {
       return  this.aspectService.resolveAspect(data, request.user);
   
     }

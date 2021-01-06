@@ -5,6 +5,7 @@ import { HttpException, HttpStatus } from "@nestjs/common";
 import { UtilsService } from "src/services/utils.service";
 import { Employee } from "../employee/employee.entity";
 import { Payload } from "src/models/payload.model";
+import { ROLE } from "src/models/enums/role.enum";
 
 export class UserService {
     constructor(@InjectRepository(User) private readonly userRepository: Repository<User>,
@@ -124,5 +125,31 @@ export class UserService {
 
     private async getUserById(id: string) {
         return await this.userRepository.findOne({ id: id }, { relations: ['roles'] });
+    }
+    
+    // TODO not finished
+    async createRoleForEmployee (employee: Employee) {
+        if (!employee) {
+            return;
+        }
+        const user = await this.getUserFormEmployee(employee);
+        const role = await this.userRoleRepository.find({ where: { user: user}, relations: ['users'] });
+        if (!role) {
+         //   role.;
+        }
+        const  roles = await this.userRoleRepository.create({
+            role: ROLE.MANAGER
+        });
+
+
+    }
+
+    async getUserFormEmployee(employee: Employee) {
+        if (!employee) {
+            return;
+        }
+        const dBemployee: Employee = await this.employeeRepository.findOne(employee);
+        return await this.userRepository.findOne(dBemployee.user );
+
     }
 }

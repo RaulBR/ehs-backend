@@ -5,6 +5,7 @@ import { PaginationObject } from 'src/models/request.model';
 import { ROLE } from 'src/models/enums/role.enum';
 import { Auth } from 'src/decorators/request.decorater';
 import { DeleteResult } from 'typeorm';
+import { CustomRequest } from 'src/models/customRequest.model';
 
 
 @Controller('employee')
@@ -13,13 +14,13 @@ export class EmployeeController {
    // addEmployee(employee: Employee, user: User)
    @Post()
    @Auth(ROLE.ADMIN)
-    setEmployee(@Req() request: any, @Body() data: Employee): Promise<Employee> {
+    setEmployee(@Req() request: CustomRequest, @Body() data: Employee): Promise<Employee> {
      return  this.employeeService.addEmployee(data, request.user);
    }
 
    @Get()
    @Auth(ROLE.USER)
-   getMyEmployee(@Req() request: any): Promise<Employee> {
+   getMyEmployee(@Req() request: CustomRequest): Promise<Employee> {
      return  this.employeeService.getMyEmployee( request.user);
    }
 

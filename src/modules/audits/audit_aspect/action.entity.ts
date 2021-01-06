@@ -6,10 +6,10 @@ import { BaseObject } from "src/models/entities/base.entity";
 @Entity()
 export class AuditAction extends BaseObject {
     @Column('bool') imidiatAcction: boolean;
-    responsableId?: string;
+    responsibleId?: string;
     @ManyToOne(type => Employee)
-    @JoinColumn({ name: 'responsableId' })
-    responsable: Employee;
+    @JoinColumn({ name: 'responsibleId' })
+    responsible: Employee;
     @Column({ type: 'date' }) limitDate: Date;
     @Column({ nullable: true }) comment: string;
     aspectId?: string;

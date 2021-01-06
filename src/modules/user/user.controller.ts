@@ -4,6 +4,7 @@ import { User } from './user.entity';
 import { UserService } from './user.service';
 import {  ValidateMapper } from 'src/decorators/request.decorater';
 import { AuthGuard } from '@nestjs/passport';
+import { CustomRequest } from 'src/models/customRequest.model';
 
 
 @Controller()
@@ -31,14 +32,14 @@ export class UserController {
         if (!user) {
             return;
         }
-        const token = await this.authService.signPayload(user)
+        const token = await this.authService.signPayload(user);
         user.token = token;
         return user
     }
    
     @Post('me')
     @UseGuards(AuthGuard('jwt'))
-    async isTokenValid(@Req() request): Promise<User> {
+    async isTokenValid(@Req() request: CustomRequest): Promise<User> {
         const user = await this.loginService.whoAmI(request.user);
         if (!user) {
             return;

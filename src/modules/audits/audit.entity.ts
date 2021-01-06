@@ -1,4 +1,4 @@
-import { Entity, Column, OneToMany, JoinColumn, OneToOne, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, OneToMany, JoinColumn,  ManyToOne, } from 'typeorm';
 import { BaseObject } from 'src/models/entities/base.entity';
 
 import { Aspect } from 'src/modules/audits/audit_aspect/aspect.entity';
@@ -11,8 +11,10 @@ export class AuditHead extends BaseObject {
     @Column({ nullable: true }) area: string;
     @Column({ nullable: true }) step: string;
     @Column({ nullable: true }) sector: string;
-    @Column({ default: "S" }) auditStatus: string;
-
+    @Column() auditStatus: string;
+    @Column({ nullable: true }) auditType: string;
+    
+    
     @OneToMany(type => Aspect, aspect => aspect.audit)
     aspects?: Aspect[];
     @Column() userId?: string;
@@ -26,8 +28,8 @@ export class AuditHead extends BaseObject {
 
 
     toResponceObject?(): AuditHead {
-        const { area, step, sector, id, auditStatus, aspects, createdDate } = this;
-        return { area, step, sector, id, auditStatus, aspects, createdDate };
+        const { area, step, sector, id, auditStatus, aspects, createdDate, auditType } = this;
+        return { area, step, sector, id, auditStatus, aspects, createdDate, auditType };
     }
 }
 

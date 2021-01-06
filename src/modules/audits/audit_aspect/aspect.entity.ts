@@ -22,6 +22,9 @@ export class Aspect extends BaseObject {
     @Column({ nullable: true })
     comment: string;
 
+    @Column({ nullable: true })
+    rejectComment: string;
+
     @Column({nullable: true})
     equipment: string;
 
@@ -52,9 +55,9 @@ export class Aspect extends BaseObject {
     state?;
 
     toResponceObject?(): Aspect {
-        const { category, comment, photos, status, id, auditAction, createdDate, type, categoryType, equipment , areaStep} = this;
+        const { category, comment, photos, status, id, auditAction, createdDate, type, categoryType, equipment , areaStep ,rejectComment} = this;
         const photoIds = photos.map(element => element.id)
-        return { category, comment, photos, status, id, auditAction, createdDate, type, photoIds, categoryType , equipment, areaStep }
+        return { category, comment, photos, status, id, auditAction, createdDate, type, photoIds, categoryType , equipment, areaStep, rejectComment}
 
     }
 }

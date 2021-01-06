@@ -24,7 +24,7 @@ export class Area extends BaseObject {
 @Entity()
 export class AreaStep extends BaseObject {
     @Column() step: string;
-    @Column() stepinfo: string;
+    @Column({ nullable: true }) stepinfo: string;
     areaId?: string;
     @ManyToOne(type => Area, area => area.steps)
     @JoinColumn({ name: 'areaId' })
@@ -45,10 +45,10 @@ export class AreaRole extends BaseObject {
     @ManyToOne(type => Area)
     @JoinColumn({ name: 'areaId' })
     area: Area;
-    responsableId?: string;
+    responsibleId?: string;
     @ManyToOne(type => Employee)
-    @JoinColumn({ name: 'responsableId' })
-    responsable: Employee;
+    @JoinColumn({ name: 'responsibleId' })
+    responsible: Employee;
     @ManyToOne(type => User)
     createdUser: User;
 }

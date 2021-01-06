@@ -11,7 +11,6 @@ import { ResponceStatus } from 'src/models/responceStatus.model';
 
 @Injectable()
 export class AreaService {
-
     constructor(
         @InjectRepository(Area) private readonly areaRepository: Repository<Area>,
         @InjectRepository(User) private readonly userRepository: Repository<User>,
@@ -48,8 +47,8 @@ export class AreaService {
                 element = this.utilsService.removeNullProperty('id', element);
                 const roletDTO = this.areaRolesRepository.create(element);
 
-                const employeeDto = this.employeeRepository.create(element.responsable);
-                roletDTO.responsable = employeeDto;
+                const employeeDto = this.employeeRepository.create(element.responsible);
+                roletDTO.responsible = employeeDto;
                 //roletDTO.area = area;
                 roletDTO.createdUser = userDTO;
                 rolestList.push(roletDTO);
@@ -73,7 +72,7 @@ export class AreaService {
                 where: { area: Like(`%${search}%`) },
                 take: rows.toRow,
                 skip: rows.fromRow,
-                relations: ['steps', 'roles', 'roles.responsable']
+                relations: ['steps', 'roles', 'roles.responsible']
             });
             return result.map(element => element.toResponceObject());
 
@@ -86,12 +85,12 @@ export class AreaService {
 
     }
 
-    async getAreaResponsable(area: string): Promise<Area> {
+    async getArearesponsible(area: string): Promise<Area> {
 
         try {
             const result = await this.areaRepository.findOne({
                 where: { area: area },
-                relations: ['roles', 'roles.responsable']
+                relations: ['roles', 'roles.responsible']
             });
             return result.toResponceObject();
 
@@ -142,7 +141,7 @@ export class AreaService {
 
     }
 
-    async deletereaStep(step: AreaStep, user: User): Promise<DeleteResult> {
+    async deleteAreaStep(step: AreaStep, user: User): Promise<DeleteResult> {
         if (!step || !user) {
             return;
         }
@@ -175,7 +174,7 @@ export class AreaService {
         }
         return await this.areaRepository.findOne({
             where: { id: area.area.id },
-            relations: ['steps', 'roles', 'roles.responsable']
+            relations: ['steps', 'roles', 'roles.responsible']
         });
         // add delete
     }
@@ -187,7 +186,7 @@ export class AreaService {
             const data = await this.areaRolesRepository.find(
                 {
                     relations: ['area'],
-                    where: { 'responsable': employee }
+                    where: { 'responsible': employee }
                 }
             );
             return data.map(e => e.area.area);

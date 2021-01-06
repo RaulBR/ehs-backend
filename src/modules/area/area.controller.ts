@@ -1,10 +1,11 @@
 import { Controller, Post, Body, Req } from '@nestjs/common';
 import { AreaService } from './area.service';
-import { Area, AreaRole } from './area.entity';
+import { Area, AreaRole, AreaStep } from './area.entity';
 import { PaginationObject } from 'src/models/request.model';
 import { Auth } from 'src/decorators/request.decorater';
 import { ROLE } from 'src/models/enums/role.enum';
 import { CustomRequest } from 'src/models/customRequest.model';
+import { DeleteResult } from 'typeorm';
 
 @Controller('area')
 export class AreaController {
@@ -32,6 +33,11 @@ export class AreaController {
     @Auth(ROLE.ADMIN)
      deletearea(@Body() data: Area): Promise<Area[]>  {
       return this.areaService.deleteArea(data);
+    }
+    @Post('/deleteStep')
+    @Auth(ROLE.ADMIN)
+     deleteStep(@Body() data: AreaStep ,@Req() request: CustomRequest): Promise<DeleteResult>  {
+      return this.areaService.deleteAreaStep(data, request.user);
     }
 
     

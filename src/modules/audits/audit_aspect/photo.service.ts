@@ -1,6 +1,6 @@
 import {  HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {  Repository } from 'typeorm';
+import {  DeleteResult, Repository } from 'typeorm';
 import { AspectPhoto, Aspect } from 'src/modules/audits/audit_aspect/aspect.entity';
 import { User } from '../../user/user.entity';
 
@@ -11,46 +11,46 @@ export class PhotoService {
         @InjectRepository(User) private readonly userHeadRepository: Repository<User>,    
         @InjectRepository(AspectPhoto) private readonly aspectphotoRepository: Repository<AspectPhoto>) { }
 
-    async setPhoto(data: AspectPhoto, user: User) {
+    async setPhoto(data: AspectPhoto, user: User): Promise<{id: string}> {
         if (!data || !user) {
-            return new HttpException('No data', HttpStatus.BAD_REQUEST);
+            throw new HttpException('No data', HttpStatus.BAD_REQUEST);
         }
         const photoRrepo = this.aspectphotoRepository.create(data);
         const userRepo = this.userHeadRepository.create(user);
         photoRrepo.user = userRepo;
         try {
-            return await (await this.aspectphotoRepository.save(photoRrepo)).toResponceId();
+            const data = await this.aspectphotoRepository.save(photoRrepo);
+            return data.toResponceId();
         } catch (e) {
-            return new HttpException('save error', 200);
+            throw new HttpException('save error', 200);
         }
 
     }
-
-    async deletePhoto(data: AspectPhoto, user: any) {
+    async deletePhoto(data: AspectPhoto, user: User): Promise<DeleteResult> {
         if (!data || !user) {
-            return new HttpException('No data', HttpStatus.BAD_REQUEST);
+            throw new HttpException('No data', HttpStatus.BAD_REQUEST);
         }
         try {
             return await this.aspectphotoRepository.delete({ userId: user.id, id: data.id });
         } catch (e) {
-            return new HttpException('delete error', 200);
+            throw new HttpException('delete error', 200);
         }
 
     }
 
-    async deletePhotoByAspect(data: Aspect, user: any) {
+    async deletePhotoByAspect(data: Aspect, user: User): Promise<DeleteResult> {
         if (!data || !user) {
-            return new HttpException('No data', HttpStatus.BAD_REQUEST);
+            throw new HttpException('No data', HttpStatus.BAD_REQUEST);
         }
         try {
             return await this.aspectphotoRepository.delete({ userId: user.id, aspectId: data.id });
         } catch (e) {
-            return new HttpException('delete error', 200);
+            throw new HttpException('delete error', 200);
         }
 
     }
 
-    async getPhotoByAspect(data: Aspect, user: any): Promise<AspectPhoto[]> {
+    async getPhotoByAspect(data: Aspect, user: User): Promise<AspectPhoto[]> {
         if (!data || !user) {
             throw new HttpException('No data', HttpStatus.BAD_REQUEST);
         }
@@ -65,7 +65,7 @@ export class PhotoService {
 
     }
 
-    async getPhotoById(data: AspectPhoto, user: any): Promise<AspectPhoto> {
+    async getPhotoById(data: AspectPhoto, user: User): Promise<AspectPhoto> {
         if (!data || !user) {
             throw new HttpException('No data', HttpStatus.BAD_REQUEST);
         }

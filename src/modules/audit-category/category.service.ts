@@ -16,13 +16,13 @@ export class CategoryService {
         private readonly utilityService: UtilsService) { }
 
 
-    async getGetCategoryTypes(data: PaginationObject): Promise<CategoryType[]> {
+    async getCategoryTypes(data: PaginationObject): Promise<CategoryType[]> {
         if(data) {
             data = data;
         }
         try {
             const categoryes = await this.categoryTypeRepository.find({
-                relations: ['categories']
+                relations: ['categories', 'responsible']
             });
             return categoryes;
         } catch (e) {
@@ -42,8 +42,10 @@ export class CategoryService {
         const userDTO = this.userRepository.create(user);
         categoryType = this.utilityService.removeNullProperty('id', categoryType);
         const categoryTypeDto = this.categoryTypeRepository.create(categoryType);
+        const responsibleUser = null;
+        // add manager role.
 
-
+        //
 
         const categories = [];
         if (categoryType.categories && categoryType.categories.length) {
@@ -97,7 +99,7 @@ export class CategoryService {
         } catch (e) {
             throw new HttpException('delete error', 200);
         }
-        return this.getGetCategoryTypes(null); 
+        return this.getCategoryTypes(null); 
     }
 
     async deleteCategory(category: Category, user: User): Promise<DeleteResult> {
@@ -110,4 +112,5 @@ export class CategoryService {
             throw new HttpException('delete error', 200);
         }
     }
+    
 }

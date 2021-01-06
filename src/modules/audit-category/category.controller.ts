@@ -20,7 +20,7 @@ export class CategoryController {
   @Post('/get')
   @Auth(ROLE.USER)
   getCategoryType( @Body() data: PaginationObject): Promise<CategoryType[]> {
-    return this.categoryService.getGetCategoryTypes(data);
+    return this.categoryService.getCategoryTypes(data);
   }
 
   @Post('/delete-categoryType')

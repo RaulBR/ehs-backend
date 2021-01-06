@@ -2,7 +2,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { AspectCrudRequest } from './aspect.model';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuditHead, } from 'src/modules/audits/audit.entity';
-import { Connection, In, Not, Repository } from 'typeorm';
+import { Connection, DeleteResult, In, Repository } from 'typeorm';
 import { UtilsService } from 'src/services/utils.service';
 import { AspectPhoto, Aspect } from 'src/modules/audits/audit_aspect/aspect.entity';
 import { User } from '../../user/user.entity';
@@ -68,9 +68,9 @@ export class AspectService {
                 aspect.audit = audit;
                 if (actionObject.auditAction) {
                     aspect.auditAction = this.utilsService.removeNullProperty('id', actionObject.auditAction);
-                    const employee = actionObject.auditAction.responsable ? this.employeeRepository.create(actionObject.auditAction.responsable) : null;
+                    const employee = actionObject.auditAction.responsible ? this.employeeRepository.create(actionObject.auditAction.responsible) : null;
                     const action = this.actionRepository.create(actionObject.auditAction);
-                    action.responsable = employee;
+                    action.responsible = employee;
                     aspect.auditAction = action;
                 }
                 if (aspect.photos && aspect.photos.length) {
@@ -102,18 +102,18 @@ export class AspectService {
 
     }
 
-    async deleteAspect(aspect: Aspect, user: User) {
+    async deleteAspect(aspect: Aspect, user: User): Promise<DeleteResult> {
         if (!aspect || !user) {
-            return new HttpException('Missinng aspect or auth', HttpStatus.BAD_REQUEST);
+            throw new HttpException('Missinng aspect or auth', HttpStatus.BAD_REQUEST);
         }
         const aspectfound = await this.aspectRepository.findOne({ where: { id: aspect.id } });
         if (!aspectfound) {
-            return new HttpException('No data', HttpStatus.BAD_REQUEST);
+            throw new  HttpException('No data', HttpStatus.BAD_REQUEST);
         }
 
         const auditHead = await this.auditHeadRepository.findOne({ where: { id: aspectfound.auditId, userId: user.id } });
         if (!auditHead) {
-            return new HttpException('No audit head', HttpStatus.BAD_REQUEST);
+            throw new  HttpException('No audit head', HttpStatus.BAD_REQUEST);
         }
 
         return this.aspectRepository.delete({ id: aspect.id })
@@ -121,7 +121,7 @@ export class AspectService {
 
 
     // add websocket
-    async acceptAspect(data: Aspect, user: any): Promise<Aspect> {
+    async acceptAspect(data: Aspect, user: User): Promise<Aspect> {
         if (!this.IsUserResposible(user, data))
             throw new HttpException('accept faild', HttpStatus.OK);
         // 
@@ -134,9 +134,9 @@ export class AspectService {
             aspect.auditAction = await this.actionRepository.save(action);
             aspect.status =  AspectSate.Approved;
             await this.statusUpdateAudit(aspect);
-            if(aspect.auditAction.responsable) {
+            if(aspect.auditAction.responsible) {
               await  this.sockerts.emitAuditisToDistributeForUser(user.email);
-              await  this.sockerts.emitMyReponsabilittyAspectsForUser(aspect.auditAction.responsable.email);
+              await  this.sockerts.emitMyReponsabilittyAspectsForUser(aspect.auditAction.responsible.email);
                 // emit to resposible
                 // reemit for me.
             }
@@ -150,21 +150,29 @@ export class AspectService {
 
     // need to add a way to write modive
     // perhaps a column or tabel for comments
-    async rejectAspect(data: Aspect, user: any): Promise<Aspect> {
+    async rejectAspect(data: Aspect, user: User): Promise<Aspect> {
         const isAllawed = await this.IsUserResposible(user, data);
         if (!isAllawed) {
             throw new HttpException('reject faild', HttpStatus.OK);
         }
-        const status = data.status != 'D' ? AspectSate.Resolved : AspectSate.Duplicat;
-        return await this.statusUpdateAspect(data, user, status);
+        try {
+            // move to transaction
+            const status = data.status != AspectSate.Duplicat ? AspectSate.Rejected : AspectSate.Duplicat;
+            const aspect =  await this.statusUpdateAspect(data, user, status);
+            await this.statusUpdateAudit(aspect);
+            await  this.sockerts.emitMyRejectedAspectsForUser(user.email);
+            return aspect;
+        } catch(e) {
+            throw new HttpException('reject faild', HttpStatus.OK);
+        }
+    
     }
 
     // must add notifications for superviser
-    async resolveAspect(data: Aspect, user: any): Promise<Aspect> {
+    async resolveAspect(data: Aspect, user: User): Promise<Aspect> {
         if (!this.IsUserResposible(user, data))
             throw new HttpException('accept faild', HttpStatus.OK);
-        // 
-        let action: AuditAction = data.auditAction
+        let action: AuditAction = data.auditAction;
         action = this.utilsService.removeNullProperty('id', action);
         action = this.actionRepository.create(action);
         let aspect: Aspect;
@@ -205,7 +213,7 @@ export class AspectService {
             await this.connection.getRepository('Aspect')
                 .createQueryBuilder()
                 .update(Aspect)
-                .set({ status: status })
+                .set({ status: status, rejectComment: aspect.rejectComment })
                 .where("id = :val", { val: aspect.id })
                 .execute();
             return aspect
