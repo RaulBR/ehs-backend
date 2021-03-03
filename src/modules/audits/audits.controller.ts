@@ -11,14 +11,14 @@ import { ResponceStatus } from 'src/models/responceStatus.model';
 
 @Controller()
 export class AuditsController {
-  constructor(private readonly auditService: AuditsService,
+  constructor(
+    private readonly auditService: AuditsService,
               private readonly auditGateway: AuditGateway) { };
   @Get('audits')
   @Auth(ROLE.USER)
   async getaudits(@Req() request: CustomRequest): Promise<AuditDto[]> {
     return await this.auditService.getAudits(request.user);
     
-
   }
   
   @Get('myAudits')
@@ -38,6 +38,7 @@ export class AuditsController {
   @Auth(ROLE.USER)
   async submitAuditHead(@Req() request: CustomRequest, @Body() data: AuditHead): Promise<ResponceStatus> {
     const responsibleList =  await this.auditService.submitAudit(data, request.user);
+    
     if(responsibleList.length) {
       this.auditGateway.emitTo(responsibleList);
     }

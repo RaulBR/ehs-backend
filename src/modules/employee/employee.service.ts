@@ -32,8 +32,8 @@ export class EmployeeService {
         const employeeDao = this.employeeRepository.create(employee);
         
         try {
-           const audditSaved = await this.employeeRepository.save(employeeDao);
-          return audditSaved.toResponceObject();
+           const employeeSaved = await this.employeeRepository.save(employeeDao);
+          return employeeSaved.toResponceObject();
         }
         catch(e) {
             throw new HttpException('save error', HttpStatus.OK);
@@ -84,6 +84,15 @@ export class EmployeeService {
             throw new HttpException('Retrive faild', HttpStatus.BAD_REQUEST);
         }
 
+    }
+
+    async setEmployeeRole(employee: Employee) {
+        try {
+            return  await this.userService.createRoleForEmployee(employee);
+        } catch(e) {
+            throw new HttpException('Cannot create Manager Role', HttpStatus.OK);
+        }
+      
     }
 
 

@@ -10,7 +10,7 @@ export class AuthService {
     }
     async validateUser(payload: Payload): Promise<any> {
         const user = await this.loginService.findByPayload(payload);
-        return user ? user.toResponceObject() : null;
+        return user;
     }
 
     async signPayload(payload :Payload): Promise<string> {

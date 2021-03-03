@@ -39,3 +39,15 @@ export class Category extends BaseObject {
     }
 }
 
+@Entity()
+export class CategoryTypeRole extends BaseObject {
+    @Column({nullable: true}) role: string;
+    categoryTypeId?: string;
+    @ManyToOne(type => CategoryType)
+    @JoinColumn({ name: 'categoryTypeId' })
+    categoryType: CategoryType;
+    responsibleId?: string;
+    @ManyToOne(type => Employee)
+    @JoinColumn({ name: 'responsibleId' })
+    responsible: Employee;
+}

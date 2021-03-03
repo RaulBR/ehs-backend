@@ -8,6 +8,10 @@ import { AreaModule } from './modules/area/area.module';
 import * as redisStore from 'cache-manager-redis-store';
 import { EmployeeModule } from './modules/employee/employee.module';
 import { CategoryModule } from './modules/audit-category/category.module';import { CashingService } from './services/cashe.service';
+import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 ;
 
 
@@ -19,16 +23,22 @@ import { CategoryModule } from './modules/audit-category/category.module';import
     AreaModule,
     EmployeeModule,
     CategoryModule,
-
+    ConfigModule.forRoot(),
+  
     CacheModule.register({
       store: redisStore,
-      host: 'ec2-54-73-148-106.eu-west-1.compute.amazonaws.com',
-      port: 13239,
-      password: 'p96ec900006c4779c08becd70d4af627c7e27a07bd667913fda8ac37ee58d74f8'
-    })
+      host: process.env.CASH_HOST,
+      port: parseInt(process.env.CASH_PORT,10),
+      password: process.env.CASH_PASSWORD || ''
+    
+    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath:  'src/email-teamplates/submited.css',
+    // }),
   ],
 
   controllers: [AppController],
   providers: [AppService , CashingService],
 })
 export class AppModule { }
+

@@ -1,21 +1,16 @@
 module.exports = {
-    name: 'default',
+    name: process.env.DB_NAME,
     type: 'postgres',
-    host: 'ec2-54-228-250-82.eu-west-1.compute.amazonaws.com',
-    port: 5432,
-    username: 'yhgbefvpubaszl',
-    password: '615ec815f556a28aa918b6f5e1cc1514d018b5a371637fcf06e4baef4b602ea9',
-    database: 'd710o49bke68if',
+    host:  process.env.DB_HOST,
+    port: parseInt(process.env.DB_PORT, 10),
+    username:  process.env.DB_USER,
+    password:  process.env.DB_PASSWORD,
+    database:  process.env.DB_DATABASE,
     synchronize: false,
     dropSchema: false,
-    logging: false,
+    logging: true,
     entities:  ["dist/**/*.entity{.ts,.js}"],
   };
 
-//     DB_HOST : 'ec2-54-228-250-82.eu-west-1.compute.amazonaws.com',
-//     DB_PASSWORD : '615ec815f556a28aa918b6f5e1cc1514d018b5a371637fcf06e4baef4b602ea9',
-//     DB_DATABASE:'d710o49bke68if',
-//     DB_NAME:  'default',
-//     DB_USER: 'yhgbefvpubaszl',
-//     DB_PORT :5432,
+
   

@@ -29,6 +29,74 @@ export class AspectService {
 
     // TODO move error messages to constants
     // TODO move status messages to constants
+    async setAuditAspect(aspectRequest: Aspect, user: User): Promise<AspectCrudRequest> {
+        if (!aspectRequest) {
+            throw new HttpException({audit:'Setati o zona de audiare'}, HttpStatus.BAD_REQUEST);
+        }
+        let auditHead = aspectRequest.audit || null;
+        if (!auditHead) {
+            throw new HttpException({audit:'Setati o zona de audiare'}, HttpStatus.BAD_REQUEST);
+        }
+        let audit;
+        const userData = this.userHeadRepository.create(user);
+        if (auditHead.id) {
+            audit = await this.auditHeadRepository.findOne({ where: { id: auditHead.id, userId: user.id } });
+            if (!audit) {
+                throw new HttpException({audit:'Setati o zona de audiare'}, HttpStatus.BAD_REQUEST);
+            }
+
+        } else {
+            auditHead = this.utilsService.removeNullProperty('id', auditHead);
+            const auditHeadDto = this.auditHeadRepository.create(auditHead);
+            const employee = await this.employeeRepository.findOne({ user: userData })
+            auditHeadDto.auditStatus = auditHeadDto.auditStatus || 'S';
+            auditHeadDto.employee = employee;
+            auditHeadDto.user = userData;
+            // audit = await this.auditHeadRepository.save(auditHeadDto);
+        }
+
+        try {
+            return this.connection.transaction(async manager => {
+
+                aspectRequest = this.utilsService.removeNullProperty('id', aspectRequest);
+                const actionObject = aspectRequest
+                const aspect: Aspect = this.aspectRepository.create(aspectRequest);
+                aspect.status = 'S';
+                aspect.audit = audit;
+                if (actionObject.auditAction) {
+                    aspect.auditAction = this.utilsService.removeNullProperty('id', actionObject.auditAction);
+                    const employee = actionObject.auditAction.responsible ? this.employeeRepository.create(actionObject.auditAction.responsible) : null;
+                    const action = this.actionRepository.create(actionObject.auditAction);
+                    action.responsible = employee;
+                    aspect.auditAction = action;
+                }
+                if (aspect.photos && aspect.photos.length) {
+                    const photoList = [];
+                    aspect.photos.forEach(photo => {
+                        if (photo.photo) {
+                            photo = this.utilsService.removeNullProperty('id', photo);
+                            photo = this.utilsService.removeNullProperty('aspectId', photo);
+                            const photorepo = this.aspectphotoRepository.create(photo);
+                            photorepo.user = userData;
+                            photoList.push(photorepo);
+                        }
+
+                    });
+                    aspect.photos = photoList;
+                }
+
+                const saveldAspect = await manager.save(aspect);
+
+                return {
+                    auditHead: audit.toResponceObject(),
+                    aspect: saveldAspect.toResponceObject(),
+                }
+            });
+
+        } catch (e) {
+            throw new HttpException(e, HttpStatus.NOT_FOUND);
+        }
+    }
 
     async setAspect(aspectRequest: AspectCrudRequest, user: User): Promise<AspectCrudRequest> {
         if (!aspectRequest) {

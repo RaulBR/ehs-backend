@@ -12,6 +12,7 @@ import { AuditAction } from './audit_aspect/action.entity';
 import { Area, AreaRole } from '../area/area.entity';
 import { AuditDto } from './audit.dto';
 import { ResponceStatus } from 'src/models/responceStatus.model';
+import { EhsMailerService } from 'src/services/ehs-mailer/ehs-mailer.service';
 
 @Injectable()
 export class AuditsService {
@@ -24,7 +25,8 @@ export class AuditsService {
         @InjectRepository(Employee) private readonly employeeRepository: Repository<Employee>,
         private readonly connection: Connection,
         private readonly areaService: AreaService,
-        private readonly utilityService: UtilsService) { }
+        private readonly utilityService: UtilsService,
+        private readonly _ehsMailerService: EhsMailerService) { }
 
     async setAuditHead(audit: AuditHead, user: User): Promise<AuditHead> {
         if (!audit || !user) {
@@ -54,7 +56,7 @@ export class AuditsService {
         }
 
         const audit = await this.auditHeadRepository.findOne({
-            relations: ['aspects', 'aspects.auditAction'],
+            relations: ['aspects', 'aspects.auditAction','employee'],
             where: {
                 id: auditHead.id,
                 'user': user,
@@ -68,10 +70,16 @@ export class AuditsService {
         const areaRoles = await this.areaService.getArearesponsible(auditHead.area);
         const responseList = [];
         if (areaRoles.roles.length) {
-            areaRoles.roles.forEach(e => responseList.push(e.responsible.email));
+            areaRoles.roles.forEach(e => {
+                if(e.role === auditHead.auditType) {
+                    responseList.push(e.responsible.email);
+                } 
+            });
         }
+        // const number = await this.getNumberOfAuditsTobeDistribuied({ email: responseList[0] });
+        this._ehsMailerService.sendToEmail( responseList[0], 'Audit de destribuit', audit, 'de distribuit');
         // TODO add Checks
-
+       
         try {
             await this.auditHeadRepository.update({ id: audit.id }, { auditStatus: 'B' });
             return responseList;
@@ -95,7 +103,7 @@ export class AuditsService {
             .innerJoinAndSelect("aspect.audit", "audit")
             .innerJoin(AreaRole, "arearole", `arearole.role = aspect.categoryType  and "arearole"."responsibleId" =:employeeId`, { employeeId })
             .innerJoinAndSelect(Area, "area", 'area.area = audit.area and "arearole"."areaId" = "area"."id"')
-            .andWhere("aspect.status='S'")
+            .where("aspect.status='S'")
             .andWhere("aspect.type='N'")
             // .andWhere("audit.auditStatus='B'")
             .orderBy("audit.area")
@@ -131,9 +139,6 @@ export class AuditsService {
         return data;
 
     }
-
-
-
 
     async getMyReponsabilittyAspects(user: User): Promise<Aspect[]> {
         const employee = await this.employeeRepository.findOne({ where: { user: user } });
@@ -259,22 +264,23 @@ export class AuditsService {
         }
 
         try {
-            const outpu2t = await this.aspectRepository.find({ where: { audit: { id: auditHeadDto.id } }, select: ['id'] })
+            const outpu2t = await this.aspectRepository.find({ where: { audit: { id: auditHeadDto.id } }, select: ['id'], relations: ['auditAction'] })
             const actionQueries = outpu2t;
             if (actionQueries && actionQueries.length) {
                 const data = [];
                 const aspectIdList = [];
                 actionQueries.forEach(element => {
-                    if (element.auditActionId) {
-                        data.push(element.id);
+                    if (element.auditAction) {
+                        data.push(element.auditAction.id);
                     }
                     aspectIdList.push(element.id);
                 });
                 // console.log(aspectIdList);
 
                 if (aspectIdList.length) await this.photoRepository.delete({ aspectId: In([...aspectIdList]) });
-                if (data.length) await this.actionRepository.delete({ aspectId: In([...data]) });
                 await this.aspectRepository.delete({ auditId: audit.id });
+                if (data.length) await this.actionRepository.delete({ id: In([...data]) });
+               
             }
 
             await this.auditHeadRepository.delete({ id: auditHeadDto.id });

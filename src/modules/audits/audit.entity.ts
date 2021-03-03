@@ -1,6 +1,5 @@
 import { Entity, Column, OneToMany, JoinColumn,  ManyToOne, } from 'typeorm';
 import { BaseObject } from 'src/models/entities/base.entity';
-
 import { Aspect } from 'src/modules/audits/audit_aspect/aspect.entity';
 import { User } from '../user/user.entity';
 import { Employee } from '../employee/employee.entity';
@@ -39,7 +38,7 @@ export class SocketListing extends BaseObject {
     @Column() email: string;
     
     toResponceObject?(): SocketListing {
-        const { socketId, email  } = this;
+        const { socketId, email } = this;
         return { socketId, email };
 
     }

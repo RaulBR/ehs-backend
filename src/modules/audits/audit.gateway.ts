@@ -15,6 +15,7 @@ import { AuditsService } from './audits.service';
 import { AuditHead } from './audit.entity';
 import { CashingService } from 'src/services/cashe.service';
 import { User } from '../user/user.entity';
+import { EhsMailerService } from 'src/services/ehs-mailer/ehs-mailer.service';
 
 @WebSocketGateway({
   namespace: 'ws',
@@ -25,16 +26,33 @@ export class AuditGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 
   constructor(private readonly auditService: AuditsService,
     private readonly cashingService: CashingService,
+    private readonly ehsMailerService: EhsMailerService
   ) { };
   @WebSocketServer()
   server: Server;
   private logger: Logger = new Logger('AuditGateway');
   @UseGuards(SocketAuth)
-  async handleConnection(client: Socket, ...args: any[]) {
-    //console.log(client,args);
+  async handleConnection(client: CustomSocket, ...args: any[]) {
+    console.log(__dirname);
+    // this.ehsMailerService.example();
+    if(!client.handshake.headers.user) {
+      this.server.sockets[client.id].disconect();
+    }
+    const key = await this.cashingService.getValue(client.handshake.headers.user);
+    if(this.server.sockets[key]) {
+      this.server.sockets[key].close();
+    }
+    
+   
+   await this.cashingService.setValue(client.handshake.headers.user, client.id);
+   this.emitAuditisToDistributeForUser(client.handshake.headers.user)
+    this.logger.log(`Client connect: ${client.id}`);
+
+
   }
 
   handleDisconnect(client: Socket): void {
+    this.cashingService.delete(client.handshake.headers.user);
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
@@ -110,6 +128,8 @@ export class AuditGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
       this.server.to(socket).emit('myRejectedAspects', number);
     }
 }
+  
+
   @SubscribeMessage('getAll')
   @UseGuards(SocketAuth)
   async getAll(client: Client): Promise<void> {
@@ -121,3 +141,9 @@ export class AuditGateway implements OnGatewayInit, OnGatewayConnection, OnGatew
 }
 
 
+
+
+
+interface CustomSocket extends Socket {
+  user: User;
+}

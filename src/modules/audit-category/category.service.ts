@@ -3,21 +3,25 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Connection, DeleteResult } from 'typeorm';
 import { User } from '../user/user.entity';
 import { UtilsService } from 'src/services/utils.service';
-import { CategoryType, Category } from './category.entity';
+import { CategoryType, Category, CategoryTypeRole } from './category.entity';
 import { PaginationObject } from 'src/models/request.model';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class CategoryService {
 
-    constructor(@InjectRepository(User) private readonly userRepository: Repository<User>,
+    constructor(
+        @InjectRepository(User) private readonly userRepository: Repository<User>,
         @InjectRepository(CategoryType) private readonly categoryTypeRepository: Repository<CategoryType>,
         @InjectRepository(Category) private readonly categoryRepository: Repository<Category>,
+        @InjectRepository(Category) private readonly categoryTypeRoleRepository: Repository<CategoryTypeRole>,
         private readonly connection: Connection,
-        private readonly utilityService: UtilsService) { }
+        private readonly utilityService: UtilsService,
+        private readonly userService: UserService) { }
 
 
     async getCategoryTypes(data: PaginationObject): Promise<CategoryType[]> {
-        if(data) {
+        if (data) {
             data = data;
         }
         try {
@@ -28,8 +32,6 @@ export class CategoryService {
         } catch (e) {
             throw new HttpException({ status: 'error' }, HttpStatus.OK);
         }
-
-
     }
 
     async setCategoryType(categoryType: CategoryType, user: User): Promise<CategoryType> {
@@ -42,10 +44,7 @@ export class CategoryService {
         const userDTO = this.userRepository.create(user);
         categoryType = this.utilityService.removeNullProperty('id', categoryType);
         const categoryTypeDto = this.categoryTypeRepository.create(categoryType);
-        const responsibleUser = null;
-        // add manager role.
-
-        //
+        // add to transaction
 
         const categories = [];
         if (categoryType.categories && categoryType.categories.length) {
@@ -76,7 +75,7 @@ export class CategoryService {
         try {
             return await this.categoryRepository.save(categoryRepo);
         } catch (e) {
-            return new HttpException('delete error', 200);
+            throw new HttpException('delete error', 200);
         }
     }
 
@@ -92,14 +91,14 @@ export class CategoryService {
             if (!dataFromDb) {
                 throw new HttpException('no data', 200);
             }
-             this.connection.transaction(async manager => {
+            this.connection.transaction(async manager => {
                 await manager.remove<Category>(dataFromDb.categories);
                 await manager.remove<CategoryType>(dataFromDb);
             });
         } catch (e) {
             throw new HttpException('delete error', 200);
         }
-        return this.getCategoryTypes(null); 
+        return this.getCategoryTypes(null);
     }
 
     async deleteCategory(category: Category, user: User): Promise<DeleteResult> {
@@ -112,5 +111,41 @@ export class CategoryService {
             throw new HttpException('delete error', 200);
         }
     }
-    
+    async addCategoryManagerCategory(categoryTypeRole: CategoryTypeRole, user: User): Promise<CategoryTypeRole> {
+
+        if (!categoryTypeRole || !user) {
+            throw new HttpException('Missing category incorect request', HttpStatus.BAD_REQUEST);
+        }
+        // TODO ADD TO TRANSACTION
+        try {
+            if (categoryTypeRole.responsible) {
+                const responsibleUser = await this.userService.createRoleForEmployee(categoryTypeRole.responsible);
+            }
+            const dbcategoryTypeRole = this.categoryTypeRoleRepository.create(categoryTypeRole);
+            return await this.categoryTypeRoleRepository.save(dbcategoryTypeRole);
+        } catch (e) {
+            throw new HttpException({ status: 'save error' }, 200);
+        }
+    }
+
+
+
+    async deleteCategoryTypeRole(category: CategoryTypeRole, user: User): Promise<DeleteResult> {
+        if (!category || !user) {
+            throw new HttpException('Missing category incorect request', HttpStatus.BAD_REQUEST);
+        }
+        try {
+            const categoryRoles = await this.categoryTypeRepository.find({ where: { responsible: category.responsible } });
+             return this.connection.transaction( manager => {
+                  if (categoryRoles.length <= 1) {
+                 this.userService.removeRoleForEmployee(category.responsible);
+            }
+            return this.categoryTypeRoleRepository.delete({ id: category.id });
+            });    
+          
+
+        } catch (e) {
+            throw new HttpException('delete error', 200);
+        }
+    }
 }
